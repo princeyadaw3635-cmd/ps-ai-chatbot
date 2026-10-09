@@ -104,35 +104,62 @@
 
   <footer>© 2026 PS AI · Built with ambition.</footer>
 
-  <script>
-    const form = document.getElementById('chatForm');
-    const input = document.getElementById('prompt');
-    const chat = document.getElementById('chat');
-    const welcome = document.getElementById('welcome');
+  
+<script>
+const SUPABASE_FUNCTION_URL = "https://bqyafptuvzbkhvnyezpa.supabase.co/functions/v1/ps-ai-chat;
+const SUPABASE_ANON_KEY = "";
 
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
+const form = document.getElementById("chatForm");
+const input = document.getElementById("prompt");
+const chat = document.getElementById("chat");
+const welcome = document.getElementById("welcome");
 
-      welcome.style.display = 'none';
+form.addEventListener("submit", async function (event) {
+  event.preventDefault();
 
-      const userMessage = document.createElement('div');
-      userMessage.className = 'message user';
-      userMessage.textContent = text;
-      chat.appendChild(userMessage);
+  const text = input.value.trim();
+  if (!text) return;
 
-      const notice = document.createElement('div');
-      notice.className = 'message bot';
-      notice.textContent =
-        'PS AI ka real AI engine abhi connect nahi hua hai. ' +
-        'Agla step: secure AI API aur backend configure karna.';
-      chat.appendChild(notice);
+  welcome.style.display = "none";
 
-      input.value = '';
-      input.focus();
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  const userMessage = document.createElement("div");
+  userMessage.className = "message user";
+  userMessage.textContent = text;
+  chat.appendChild(userMessage);
+
+  const replyMessage = document.createElement("div");
+  replyMessage.className = "message bot";
+  replyMessage.textContent = "PS AI सोच रहा है...";
+  chat.appendChild(replyMessage);
+
+  input.value = "";
+  input.focus();
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+
+  try {
+    const response = await fetch(SUPABASE_FUNCTION_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ message: text })
     });
-  </script>
-</body>
-</html>
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Request failed: " + response.status);
+    }
+
+    replyMessage.textContent = data.reply || "कोई जवाब नहीं मिला।";
+  } catch (error) {
+    replyMessage.textContent =
+      "माफ़ कीजिए, अभी कनेक्शन में समस्या है। कृपया दोबारा कोशिश करें।";
+    console.error("PS AI error:", error);
+  }
+
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+});
+</script>
